@@ -1,0 +1,277 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ReleaseNotesGenerator.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:behaviors="using:ReleaseNotesGenerator.UI.Behaviors"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="ReleaseNotesGenerator.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Générateur de Release Notes GitLab"
+        Width="1400" Height="900"
+        WindowState="Maximized"
+        TransparencyLevelHint="AcrylicBlur"
+        ExtendClientAreaToDecorationsHint="True">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  AllowAutoHide="True"
+                  IsScrollInertiaEnabled="True">
+        <Grid RowDefinitions="Auto,*,Auto" Margin="24" MinHeight="800">
+
+            <!-- Header Section -->
+            <StackPanel Grid.Row="0" Spacing="12">
+                <!-- Title with Gradient -->
+                <StackPanel Spacing="2" Margin="0,8,0,0">
+                    <TextBlock Text="🚀 Release Notes Generator"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#F1F5F9"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            <!-- Project Search Card -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="section-title" Text="🔍 Rechercher un Projet" FontSize="16"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0"
+                                 Classes="modern"
+                                 Text="{Binding ProjectNameOrId}"
+                                 Watermark="Nom ou ID du projet + Entrée..."
+                                 VerticalContentAlignment="Center"
+                                 Margin="0,0,8,0">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding SearchProjectCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+
+                        <Button Grid.Column="1"
+                                Classes="secondary"
+                                Content="🔍"
+                                Command="{Binding SearchProjectCommand}"
+                                IsEnabled="{Binding !IsLoading}"
+                                Width="44"
+                                Height="44"
+                                FontSize="18"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Project List -->
+                    <ComboBox Classes="modern"
+                              ItemsSource="{Binding Projects}"
+                              SelectedItem="{Binding SelectedProject}"
+                              IsVisible="{Binding Projects.Count}"
+                              IsDropDownOpen="{Binding IsProjectDropDownOpen, Mode=TwoWay}"
+                              behaviors:FocusBehavior.IsFocused="{Binding FocusProjectComboBox}"
+                              PlaceholderText="Sélectionnez un projet..."
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding GenerateReleaseNotesCommand}"/>
+                        </ComboBox.KeyBindings>
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PathWithNamespace}" Foreground="#E2E8F0"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Project Description -->
+                    <Border IsVisible="{Binding IsProjectSelected}"
+                            Background="#0F172A"
+                            CornerRadius="8"
+                            Padding="12"
+                            BorderBrush="#334155"
+                            BorderThickness="1">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding SelectedProject.Name}"
+                                       FontWeight="SemiBold"
+                                       FontSize="13"
+                                       Foreground="#F1F5F9"/>
+                            <TextBlock Text="{Binding SelectedProject.Description}"
+                                       FontSize="12"
+                                       Foreground="#94A3B8"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="60"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Tag Selection Card -->
+            <Border Classes="card" IsEnabled="{Binding Tags.Count}">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="section-title" Text="🏷️ Plage de Versions" FontSize="16"/>
+
+                    <CheckBox Classes="modern"
+                              Content="Utiliser les 2 derniers tags par défaut"
+                              IsChecked="{Binding UseDefaultTags}"/>
+
+                    <Grid ColumnDefinitions="*,*" IsVisible="{Binding !UseDefaultTags}">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,6,0">
+                            <TextBlock Classes="label" Text="TAG DE DÉPART (LE PLUS ANCIEN)"/>
+                            <ComboBox Classes="modern"
+                                      ItemsSource="{Binding Tags}"
+                                      SelectedItem="{Binding SelectedFromTag}"
+                                      PlaceholderText="Sélectionnez le tag le plus ancien..."
+                                      HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="8" Margin="6,0,0,0">
+                            <TextBlock Classes="label" Text="TAG D'ARRIVÉE (LE PLUS RÉCENT)"/>
+                            <ComboBox Classes="modern"
+                                      ItemsSource="{Binding Tags}"
+                                      SelectedItem="{Binding SelectedToTag}"
+                                      PlaceholderText="Sélectionnez le tag le plus récent..."
+                                      HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Classes="primary"
+                            Content="✨ Générer les Release Notes"
+                            Command="{Binding GenerateReleaseNotesCommand}"
+                            IsEnabled="{Binding !IsLoading}"
+                            HorizontalAlignment="Center"
+                            MinWidth="220"
+                            Padding="24,10"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Main Content - Markdown Output -->
+        <Grid Grid.Row="1" Margin="0,16,0,0" ColumnDefinitions="*,*">
+            <!-- Raw Markdown Panel -->
+            <Border Grid.Column="0" Classes="card" Margin="0,0,8,0">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <TextBlock Grid.Row="0" Classes="section-title" Text="📄 Release Notes Brutes" Margin="0,0,0,12"/>
+
+                    <ScrollViewer Grid.Row="1">
+                        <TextBox Classes="modern"
+                                 Text="{Binding MarkdownOutput, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 FontFamily="Consolas,Monaco,Courier New"
+                                 FontSize="13"
+                                 MinHeight="300"
+                                 BorderThickness="0"
+                                 Background="#0F172A"/>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Spacing="8"
+                                Margin="0,12,0,0">
+                        <Button Classes="secondary"
+                                Content="📋 Copier"
+                                Command="{Binding CopyToClipboardCommand}"
+                                MinWidth="100"/>
+                        <Button Classes="primary"
+                                Content="✨ Copier pour IA"
+                                Command="{Binding CopyForAICommand}"
+                                MinWidth="140"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Improved Markdown Panel -->
+            <Border Grid.Column="1" Classes="card" Margin="8,0,0,0">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,12">
+                        <TextBlock Classes="section-title" Text="✨ Version Améliorée par IA"/>
+                        <TextBlock Classes="label" Text="Généré automatiquement avec Mistral AI ou collez manuellement"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1">
+                        <TextBox Classes="modern"
+                                 Text="{Binding ImprovedMarkdownOutput}"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 FontFamily="Consolas,Monaco,Courier New"
+                                 FontSize="13"
+                                 MinHeight="300"
+                                 BorderThickness="0"
+                                 Background="#0F172A"
+                                 Watermark="Cliquez sur 'Générer avec IA' ou collez manuellement..."/>
+                    </ScrollViewer>
+
+                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,12,0,0">
+                        <Button Grid.Column="0"
+                                Classes="primary"
+                                Content="🤖 Générer avec IA"
+                                Command="{Binding GenerateImprovedVersionCommand}"
+                                IsEnabled="{Binding !IsLoading}"
+                                HorizontalAlignment="Left"
+                                MinWidth="160"/>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Spacing="8">
+                            <Button Classes="secondary"
+                                    Content="📋 Copier"
+                                    Command="{Binding CopyImprovedToClipboardCommand}"
+                                    MinWidth="100"
+                                    IsEnabled="{Binding ImprovedMarkdownOutput.Length}"/>
+                            <Button Classes="primary"
+                                    Content="💾 Sauvegarder"
+                                    Command="{Binding SaveToFileCommand}"
+                                    MinWidth="120"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Loading Overlay with Blur Effect -->
+            <Border Grid.ColumnSpan="2"
+                    Background="#DD0F172A"
+                    IsVisible="{Binding IsLoading}"
+                    CornerRadius="16">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Spacing="20">
+                    <ProgressBar IsIndeterminate="True"
+                                 Width="280"
+                                 Height="6"
+                                 Foreground="#3B82F6"
+                                 Background="#1E293B"/>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="#F1F5F9"
+                               FontSize="16"
+                               FontWeight="Medium"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2"
+                Classes="status-bar"
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Grid.Column="0"
+                           Text="●"
+                           Foreground="#10B981"
+                           FontSize="20"
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding StatusMessage}"
+                           Foreground="#E2E8F0"
+                           FontWeight="Medium"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+        </Grid>
+    </ScrollViewer>
+</Window>
