@@ -1,14 +1,15 @@
 # 📝 Release Notes Generator
 
-Générateur automatique de release notes depuis Git et GitLab avec recherche intelligente de projet.
+Générateur automatique de release notes depuis GitLab avec recherche intelligente de projet.
 
 ## 🎯 Fonctionnalités
 
-- ✅ **Recherche de projet GitLab** : Cherche et sélectionne automatiquement le projet
-- ✅ **Analyse des commits Git** : Parse les commits entre 2 tags
+- ✅ **Recherche de projet GitLab** : Cherche et sélectionne automatiquement le projet par nom ou ID
+- ✅ **Analyse des commits GitLab** : Parse les commits entre 2 tags
 - ✅ **Catégorisation automatique** : feat, fix, refactor, docs, test, chore
 - ✅ **Extraction de tickets JIRA** : Détecte automatiquement les FTELINFO-123, SAS-456, etc.
 - ✅ **Intégration GitLab MRs** : Récupère les Merge Requests associées
+- ✅ **Sélection intelligente des tags** : Propose automatiquement les 2 dernières releases
 - ✅ **Génération Markdown** : Format prêt à copier/coller
 - ✅ **Copie automatique** dans le presse-papier
 - ✅ **Menu interactif** avec Spectre.Console
@@ -23,7 +24,7 @@ Générateur automatique de release notes depuis Git et GitLab avec recherche in
 
 ### 1. Obtenir le token API GitLab
 
-1. Allez sur votre instance GitLab : `https://your-gitlab.com/-/profile/personal_access_tokens`
+1. Allez sur votre instance GitLab : `https://votre-gitlab.com/-/profile/personal_access_tokens`
 2. Créez un nouveau token avec les scopes :
    - `read_api`
    - `read_repository`
@@ -37,8 +38,8 @@ Générateur automatique de release notes depuis Git et GitLab avec recherche in
 ```json
 {
   "GitLab": {
-    "BaseUrl": "https://your-gitlab.com",
-    "ApiToken": "YOUR_GITLAB_API_TOKEN_HERE"
+    "BaseUrl": "https://votre-gitlab.com",
+    "ApiToken": "VOTRE_TOKEN_API_GITLAB"
   }
 }
 ```
@@ -48,16 +49,19 @@ Générateur automatique de release notes depuis Git et GitLab avec recherche in
 ### Mode interactif (recommandé)
 
 ```bash
-cd /path/to/votre-repo
-dotnet run --project ReleaseNotesGenerator
+cd ReleaseNotesGenerator
+dotnet run
 
 # Ou avec le projet spécifié
-dotnet run --project ReleaseNotesGenerator -- --project "Ftello"
+dotnet run -- --project "Ftello"
+
+# Ou avec l'ID du projet
+dotnet run -- --project "123"
 ```
 
 **L'outil va :**
 1. Rechercher le projet dans GitLab (par nom ou ID)
-2. Lister les tags Git disponibles
+2. Lister les tags GitLab disponibles
 3. Proposer par défaut de comparer les 2 dernières releases
    - Si vous acceptez, utilise automatiquement ces tags
    - Si vous refusez, vous laisse choisir manuellement
@@ -119,7 +123,6 @@ dotnet run -- --project "Commerce" --from v1.0.0 --output RELEASE_v1.1.0.md
 ReleaseNotesGenerator/
 ├── Models/              # DTOs (GitCommit, GitLabProject, ReleaseNote, etc.)
 ├── Services/
-│   ├── GitService.cs              # Opérations Git locales
 │   ├── GitLabService.cs           # API GitLab
 │   ├── ReleaseNoteGeneratorService.cs  # Génération du Markdown
 │   └── MenuService.cs             # Menu interactif
@@ -180,9 +183,9 @@ L'exécutable sera dans : `bin/Release/net9.0/win-x64/publish/`
 
 ➡️ Vérifiez que `appsettings.json` existe et contient votre token.
 
-### Erreur "Aucun tag Git trouvé"
+### Erreur "Aucun tag GitLab trouvé"
 
-➡️ Assurez-vous d'être dans un repository Git avec des tags.
+➡️ Assurez-vous que le projet a des tags dans GitLab.
 
 ### Erreur "401 Unauthorized" (GitLab)
 
