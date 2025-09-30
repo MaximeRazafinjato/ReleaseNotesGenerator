@@ -1,141 +1,141 @@
 # 📝 Release Notes Generator
 
-Générateur automatique de release notes depuis GitLab avec recherche intelligente de projet.
+Automatic release notes generator from GitLab with smart project search.
 
-## 🎯 Fonctionnalités
+## 🎯 Features
 
-- ✅ **Recherche de projet GitLab** : Cherche et sélectionne automatiquement le projet par nom ou ID
-- ✅ **Analyse des commits GitLab** : Parse les commits entre 2 tags
-- ✅ **Catégorisation automatique** : feat, fix, refactor, docs, test, chore
-- ✅ **Extraction de tickets JIRA** : Détecte automatiquement les FTELINFO-123, SAS-456, etc.
-- ✅ **Intégration GitLab MRs** : Récupère les Merge Requests associées
-- ✅ **Sélection intelligente des tags** : Propose automatiquement les 2 dernières releases
-- ✅ **Génération Markdown** : Format prêt à copier/coller
-- ✅ **Copie automatique** dans le presse-papier
-- ✅ **Menu interactif** avec Spectre.Console
+- ✅ **GitLab Project Search**: Automatically search and select project by name or ID
+- ✅ **GitLab Commits Analysis**: Parse commits between 2 tags
+- ✅ **Automatic Categorization**: feat, fix, refactor, docs, test, chore
+- ✅ **JIRA Ticket Extraction**: Automatically detects FTELINFO-123, SAS-456, etc.
+- ✅ **GitLab MRs Integration**: Retrieves associated Merge Requests
+- ✅ **Smart Tag Selection**: Automatically suggests last 2 releases
+- ✅ **Markdown Generation**: Copy/paste ready format
+- ✅ **Automatic Clipboard Copy**
+- ✅ **Interactive Menu** with Spectre.Console
 
-## 📋 Prérequis
+## 📋 Prerequisites
 
 - .NET 9.0 SDK
-- Token API GitLab
-- ✅ **Pas besoin de Git local** - Tout est récupéré depuis GitLab !
+- GitLab API Token
+- ✅ **No local Git needed** - Everything fetched from GitLab!
 
 ## 🔐 Configuration
 
-### 1. Obtenir le token API GitLab
+### 1. Get GitLab API Token
 
-1. Allez sur votre instance GitLab : `https://votre-gitlab.com/-/profile/personal_access_tokens`
-2. Créez un nouveau token avec les scopes :
+1. Go to your GitLab instance: `https://your-gitlab.com/-/profile/personal_access_tokens`
+2. Create a new token with scopes:
    - `read_api`
    - `read_repository`
-3. Copiez le token
+3. Copy the token
 
-### 2. Configurer l'outil
+### 2. Configure the tool
 
-1. Copiez `appsettings.example.json` vers `appsettings.json`
-2. Éditez `appsettings.json` avec vos paramètres :
+1. Copy `appsettings.example.json` to `appsettings.json`
+2. Edit `appsettings.json` with your parameters:
 
 ```json
 {
   "GitLab": {
-    "BaseUrl": "https://votre-gitlab.com",
-    "ApiToken": "VOTRE_TOKEN_API_GITLAB"
+    "BaseUrl": "https://your-gitlab.com",
+    "ApiToken": "YOUR_GITLAB_API_TOKEN"
   }
 }
 ```
 
-## 🚀 Utilisation
+## 🚀 Usage
 
-### Mode interactif (recommandé)
+### Interactive mode (recommended)
 
 ```bash
 cd ReleaseNotesGenerator
 dotnet run
 
-# Ou avec le projet spécifié
+# Or with project specified
 dotnet run -- --project "Ftello"
 
-# Ou avec l'ID du projet
+# Or with project ID
 dotnet run -- --project "123"
 ```
 
-**L'outil va :**
-1. Rechercher le projet dans GitLab (par nom ou ID)
-2. Lister les tags GitLab disponibles
-3. Proposer par défaut de comparer les 2 dernières releases
-   - Si vous acceptez, utilise automatiquement ces tags
-   - Si vous refusez, vous laisse choisir manuellement
-4. Générer les release notes
-5. Copier dans le presse-papier
+**The tool will:**
+1. Search project in GitLab (by name or ID)
+2. List available GitLab tags
+3. Suggest by default to compare last 2 releases
+   - If you accept, automatically uses these tags
+   - If you decline, lets you choose manually
+4. Generate release notes
+5. Copy to clipboard
 
-### Mode ligne de commande
+### Command line mode
 
 ```bash
-# Entre 2 tags avec projet GitLab (par nom)
+# Between 2 tags with GitLab project (by name)
 dotnet run -- --project "Ftello" --from v1.0.0 --to v1.1.0
 
-# Entre 2 tags avec projet GitLab (par ID)
+# Between 2 tags with GitLab project (by ID)
 dotnet run -- --project "123" --from v1.0.0 --to v1.1.0
 
-# Depuis un tag jusqu'à HEAD
+# From a tag to HEAD
 dotnet run -- --project "Hub3E" --from v2.0.0
 
-# Avec sauvegarde dans un fichier
+# With save to file
 dotnet run -- --project "Commerce" --from v1.0.0 --output RELEASE_v1.1.0.md
 ```
 
-### Arguments disponibles
+### Available Arguments
 
-- `--project`, `-p` : Nom ou ID du projet GitLab
-  - Nom: recherche par nom (ex: "Ftello", "Hub3E")
-  - ID: recherche directe par ID numérique (ex: "123")
-  - L'ID se trouve dans GitLab sous le nom du projet
-- `--from`, `-f` : Tag de début (requis)
-- `--to`, `-t` : Tag de fin (optionnel, défaut: HEAD)
-- `--output`, `-o` : Fichier de sortie (optionnel)
+- `--project`, `-p`: GitLab project name or ID
+  - Name: search by name (e.g., "Ftello", "Hub3E")
+  - ID: direct search by numeric ID (e.g., "123")
+  - ID is found in GitLab under the project name
+- `--from`, `-f`: Start tag (required)
+- `--to`, `-t`: End tag (optional, default: HEAD)
+- `--output`, `-o`: Output file (optional)
 
-## 📊 Exemple de sortie
+## 📊 Example Output
 
 ```markdown
 # Release Notes - v1.1.0
 
-**Date**: 30 Septembre 2025
+**Date**: September 30, 2025
 **Range**: `v1.0.0` → `v1.1.0`
 **Commits**: 42
 **Merge Requests**: 8
 
 ## 🎉 Features
-- **[FTELINFO-123]** Ajout du module de gestion des utilisateurs ([!456](https://gitlab.com/mr/456)) by @mrazafinjato
-- **[SAS-789]** Intégration API HUB3E (`a1b2c3d`)
+- **[FTELINFO-123]** Add user management module ([!456](https://gitlab.com/mr/456)) by @mrazafinjato
+- **[SAS-789]** Integrate HUB3E API (`a1b2c3d`)
 
 ## 🐛 Bug Fixes
-- **[COMMERCE-456]** Correction du calcul de TVA ([!457](https://gitlab.com/mr/457))
-- Fix crash au démarrage sur Windows 11 (`d4e5f6g`)
+- **[COMMERCE-456]** Fix VAT calculation ([!457](https://gitlab.com/mr/457))
+- Fix crash on Windows 11 startup (`d4e5f6g`)
 
 ## 🔧 Refactoring
-- Simplification de la couche service (`h7i8j9k`)
-- Migration vers .NET 9 (`k1l2m3n`)
+- Simplify service layer (`h7i8j9k`)
+- Migrate to .NET 9 (`k1l2m3n`)
 ```
 
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
 ReleaseNotesGenerator/
 ├── Models/              # DTOs (GitCommit, GitLabProject, ReleaseNote, etc.)
 ├── Services/
-│   ├── GitLabService.cs           # API GitLab
-│   ├── ReleaseNoteGeneratorService.cs  # Génération du Markdown
-│   └── MenuService.cs             # Menu interactif
-├── Program.cs                     # Point d'entrée
+│   ├── GitLabService.cs           # GitLab API
+│   ├── ReleaseNoteGeneratorService.cs  # Markdown generation
+│   └── MenuService.cs             # Interactive menu
+├── Program.cs                     # Entry point
 ├── appsettings.json              # Configuration
-└── README.md                      # Ce fichier
+└── README.md                      # This file
 ```
 
-## 🔍 Détection automatique
+## 🔍 Automatic Detection
 
-### Types de commits
+### Commit Types
 
-Le tool détecte automatiquement le type de commit :
+The tool automatically detects commit types:
 
 - `feat:`, `feature:` → 🎉 Features
 - `fix:`, `bugfix:` → 🐛 Bug Fixes
@@ -143,11 +143,11 @@ Le tool détecte automatiquement le type de commit :
 - `docs:`, `doc:` → 📝 Documentation
 - `test:`, `tests:` → 🧪 Tests
 - `chore:`, `build:`, `ci:` → ⚙️ Chore
-- Autre → 📦 Other
+- Other → 📦 Other
 
-### Tickets JIRA
+### JIRA Tickets
 
-Extrait automatiquement les références comme :
+Automatically extracts references like:
 - `FTELINFO-123`
 - `SAS-456`
 - `COMMERCE-789`
@@ -156,73 +156,73 @@ Extrait automatiquement les références comme :
 
 ### Merge Requests
 
-Associe automatiquement les commits aux MRs GitLab en cherchant :
-- Même ticket JIRA
-- Titre similaire
-- Description contenant le commit
+Automatically associates commits to GitLab MRs by searching:
+- Same JIRA ticket
+- Similar title
+- Description containing the commit
 
-## 🛠️ Développement
+## 🛠️ Development
 
-### Compiler
+### Build
 
 ```bash
 dotnet build
 ```
 
-### Publier (executable standalone)
+### Publish (standalone executable)
 
 ```bash
 dotnet publish -c Release -r win-x64 --self-contained
 ```
 
-L'exécutable sera dans : `bin/Release/net9.0/win-x64/publish/`
+The executable will be in: `bin/Release/net9.0/win-x64/publish/`
 
-## 🐛 Dépannage
+## 🐛 Troubleshooting
 
-### Erreur "Configuration GitLab manquante"
+### Error "GitLab configuration missing"
 
-➡️ Vérifiez que `appsettings.json` existe et contient votre token.
+➡️ Check that `appsettings.json` exists and contains your token.
 
-### Erreur "Aucun tag GitLab trouvé"
+### Error "No GitLab tags found"
 
-➡️ Assurez-vous que le projet a des tags dans GitLab.
+➡️ Ensure the project has tags in GitLab.
 
-### Erreur "401 Unauthorized" (GitLab)
+### Error "401 Unauthorized" (GitLab)
 
-➡️ Vérifiez :
-- Votre token API GitLab
-- Les scopes du token (`read_api`, `read_repository`)
-- L'URL de base GitLab
+➡️ Verify:
+- Your GitLab API token
+- Token scopes (`read_api`, `read_repository`)
+- GitLab base URL
 
-### Aucun projet trouvé
+### No project found
 
-➡️ Vérifiez :
-- Le nom du projet (essayez une recherche plus large)
-- Que vous avez accès au projet dans GitLab
-- Que le token a les droits suffisants
+➡️ Verify:
+- Project name (try broader search)
+- You have access to the project in GitLab
+- Token has sufficient rights
 
-## 📦 Packages utilisés
+## 📦 Packages Used
 
-- `Newtonsoft.Json` (13.0.3) - Sérialisation JSON
-- `RestSharp` (112.1.0) - Client HTTP REST
-- `TextCopy` (6.2.1) - Copie presse-papier
-- `Spectre.Console` (0.48.0) - Interface CLI interactive
-- `System.CommandLine` (2.0.0-beta4) - Parsing d'arguments
+- `Newtonsoft.Json` (13.0.3) - JSON serialization
+- `RestSharp` (112.1.0) - HTTP REST client
+- `TextCopy` (6.2.1) - Clipboard copy
+- `Spectre.Console` (0.48.0) - Interactive CLI interface
+- `System.CommandLine` (2.0.0-beta4) - Argument parsing
 - `Microsoft.Extensions.Configuration.Json` (9.0.0) - Configuration
 
-## 💡 Conseils
+## 💡 Tips
 
-1. **Mode rapide** : En mode interactif sans arguments, l'outil propose automatiquement de comparer les 2 dernières releases
-2. **Recherche par ID** : Utilisez l'ID du projet pour une sélection plus rapide (visible dans GitLab)
-3. **Convention de commits** : Utilisez des préfixes (`feat:`, `fix:`, etc.) pour une meilleure catégorisation
-4. **Tickets JIRA** : Mentionnez toujours le ticket dans le message de commit
-5. **Tags réguliers** : Tagguez régulièrement vos versions pour faciliter la génération
-6. **MRs descriptives** : Remplissez bien les titres et descriptions de vos Merge Requests
+1. **Fast mode**: In interactive mode without arguments, tool automatically suggests comparing last 2 releases
+2. **Search by ID**: Use project ID for faster selection (visible in GitLab)
+3. **Commit convention**: Use prefixes (`feat:`, `fix:`, etc.) for better categorization
+4. **JIRA tickets**: Always mention ticket in commit message
+5. **Regular tags**: Tag your versions regularly to facilitate generation
+6. **Descriptive MRs**: Fill titles and descriptions of your Merge Requests properly
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+Contributions are welcome! Feel free to open an issue or pull request.
 
-## 📜 Licence
+## 📜 License
 
 MIT
