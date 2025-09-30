@@ -29,6 +29,7 @@ bld/
 # Configuration files with sensitive data
 appsettings.json
 appsettings.*.json
+!appsettings.example.json
 
 # IDE
 .idea/
