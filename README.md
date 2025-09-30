@@ -2,8 +2,11 @@
 
 Automatic release notes generator from GitLab with smart project search.
 
+> **🎨 Two modes available**: Modern GUI (Avalonia) and CLI (Console)
+
 ## 🎯 Features
 
+### Core Features
 - ✅ **GitLab Project Search**: Automatically search and select project by name or ID
 - ✅ **GitLab Commits Analysis**: Parse commits between 2 tags
 - ✅ **Automatic Categorization**: feat, fix, refactor, docs, test, chore
@@ -12,12 +15,25 @@ Automatic release notes generator from GitLab with smart project search.
 - ✅ **Smart Tag Selection**: Automatically suggests last 2 releases
 - ✅ **Markdown Generation**: Copy/paste ready format
 - ✅ **Automatic Clipboard Copy**
+
+### GUI Mode (UI/)
+- ✅ **Modern Dark Interface** with Avalonia UI
+- ✅ **Real-time Search** with Enter key support
+- ✅ **Two-panel Layout**: Raw and AI-improved markdown
+- ✅ **AI Integration**: Mistral AI for automatic improvement
+- ✅ **Keyboard Navigation**: Full keyboard support
+- ✅ **French Interface**: Complete French translation
+- ✅ **MR Filtering**: Smart merge request filtering by commit dates
+
+### CLI Mode (ReleaseNotesGenerator/)
 - ✅ **Interactive Menu** with Spectre.Console
+- ✅ **Command Line Arguments**: Batch mode support
 
 ## 📋 Prerequisites
 
 - .NET 9.0 SDK
 - GitLab API Token
+- Mistral AI API Key (optional, for GUI AI improvement)
 - ✅ **No local Git needed** - Everything fetched from GitLab!
 
 ## 🔐 Configuration
@@ -30,10 +46,17 @@ Automatic release notes generator from GitLab with smart project search.
    - `read_repository`
 3. Copy the token
 
-### 2. Configure the tool
+### 2. Get Mistral AI API Key (Optional - GUI only)
 
+1. Go to [Mistral AI Console](https://console.mistral.ai/)
+2. Create an account and generate an API key
+3. Copy the key
+
+### 3. Configure the tool
+
+**For CLI mode** (`ReleaseNotesGenerator/`):
 1. Copy `appsettings.example.json` to `appsettings.json`
-2. Edit `appsettings.json` with your parameters:
+2. Edit with your GitLab parameters:
 
 ```json
 {
@@ -44,9 +67,48 @@ Automatic release notes generator from GitLab with smart project search.
 }
 ```
 
+**For GUI mode** (`UI/`):
+1. Copy `UI/appsettings.example.json` to `UI/appsettings.json`
+2. Edit with your parameters:
+
+```json
+{
+  "GitLab": {
+    "BaseUrl": "https://your-gitlab.com",
+    "ApiToken": "YOUR_GITLAB_API_TOKEN"
+  },
+  "Mistral": {
+    "ApiKey": "YOUR_MISTRAL_API_KEY",
+    "Model": "mistral-large-latest"
+  }
+}
+```
+
 ## 🚀 Usage
 
-### Interactive mode (recommended)
+### 🎨 GUI Mode (Modern Interface)
+
+```bash
+cd UI
+dotnet run
+```
+
+**Features:**
+1. **Search Project**: Enter project name or ID, press Enter
+2. **Select Project**: If multiple results, select from dropdown
+3. **Tag Selection**:
+   - Default: Uses last 2 tags automatically
+   - Manual: Uncheck "Use last 2 tags" to select specific tags
+4. **Generate**: Click "Générer les Release Notes" or press Enter
+5. **AI Improvement**: Click "Générer avec IA" for Mistral AI enhancement
+6. **Copy/Save**: Copy to clipboard or save to file
+
+**Keyboard Shortcuts:**
+- `Enter` in search field → Search project
+- `Enter` on project selection → Generate release notes
+- Full keyboard navigation support
+
+### 📟 CLI Mode (Interactive mode)
 
 ```bash
 cd ReleaseNotesGenerator
@@ -121,13 +183,31 @@ dotnet run -- --project "Commerce" --from v1.0.0 --output RELEASE_v1.1.0.md
 
 ```
 ReleaseNotesGenerator/
-├── Models/              # DTOs (GitCommit, GitLabProject, ReleaseNote, etc.)
-├── Services/
-│   ├── GitLabService.cs           # GitLab API
-│   ├── ReleaseNoteGeneratorService.cs  # Markdown generation
-│   └── MenuService.cs             # Interactive menu
-├── Program.cs                     # Entry point
-├── appsettings.json              # Configuration
+├── ReleaseNotesGenerator/         # CLI Console Application
+│   ├── Models/                    # DTOs (GitCommit, GitLabProject, etc.)
+│   ├── Services/
+│   │   ├── GitLabService.cs       # GitLab API
+│   │   ├── ReleaseNoteGeneratorService.cs  # Markdown generation
+│   │   └── MenuService.cs         # Interactive menu
+│   ├── Program.cs                 # Entry point
+│   └── appsettings.json          # Configuration
+│
+├── UI/                            # GUI Avalonia Application
+│   ├── Models/                    # DTOs (GitCommit, GitLabProject, etc.)
+│   ├── Services/
+│   │   ├── GitLabService.cs       # GitLab API
+│   │   ├── ReleaseNoteGeneratorService.cs  # Markdown generation
+│   │   └── MistralService.cs      # Mistral AI integration
+│   ├── ViewModels/
+│   │   └── MainWindowViewModel.cs # Main view logic
+│   ├── Views/
+│   │   └── MainWindow.axaml       # Main UI layout
+│   ├── Behaviors/
+│   │   └── FocusBehavior.cs       # Keyboard navigation
+│   ├── App.axaml                  # Application styles
+│   ├── Program.cs                 # Entry point
+│   └── appsettings.json          # Configuration (with Mistral)
+│
 └── README.md                      # This file
 ```
 
@@ -203,6 +283,7 @@ The executable will be in: `bin/Release/net9.0/win-x64/publish/`
 
 ## 📦 Packages Used
 
+### CLI Application
 - `Newtonsoft.Json` (13.0.3) - JSON serialization
 - `RestSharp` (112.1.0) - HTTP REST client
 - `TextCopy` (6.2.1) - Clipboard copy
@@ -210,14 +291,27 @@ The executable will be in: `bin/Release/net9.0/win-x64/publish/`
 - `System.CommandLine` (2.0.0-beta4) - Argument parsing
 - `Microsoft.Extensions.Configuration.Json` (9.0.0) - Configuration
 
+### GUI Application
+- `Avalonia` (11.3.6) - Cross-platform UI framework
+- `Avalonia.Themes.Fluent` (11.3.6) - Modern Fluent theme
+- `CommunityToolkit.Mvvm` (8.4.0) - MVVM implementation
+- `Newtonsoft.Json` (13.0.3) - JSON serialization
+- `RestSharp` (112.1.0) - HTTP REST client
+- `TextCopy` (6.2.1) - Clipboard copy
+- `Microsoft.Extensions.Configuration.Json` (9.0.0) - Configuration
+
 ## 💡 Tips
 
-1. **Fast mode**: In interactive mode without arguments, tool automatically suggests comparing last 2 releases
-2. **Search by ID**: Use project ID for faster selection (visible in GitLab)
-3. **Commit convention**: Use prefixes (`feat:`, `fix:`, etc.) for better categorization
-4. **JIRA tickets**: Always mention ticket in commit message
-5. **Regular tags**: Tag your versions regularly to facilitate generation
-6. **Descriptive MRs**: Fill titles and descriptions of your Merge Requests properly
+1. **GUI for daily use**: Use the modern UI for quick, visual release notes generation
+2. **CLI for automation**: Use command line mode for scripts and CI/CD pipelines
+3. **AI improvement**: Let Mistral AI polish your release notes for professional communication
+4. **Fast mode**: Tool automatically suggests comparing last 2 releases
+5. **Search by ID**: Use project ID for faster selection (visible in GitLab)
+6. **Commit convention**: Use prefixes (`feat:`, `fix:`, etc.) for better categorization
+7. **JIRA tickets**: Always mention ticket in commit message
+8. **Regular tags**: Tag your versions regularly to facilitate generation
+9. **Descriptive MRs**: Fill titles and descriptions of your Merge Requests properly
+10. **Keyboard navigation**: Use Enter key and Tab for faster workflow in GUI
 
 ## 🤝 Contribution
 
